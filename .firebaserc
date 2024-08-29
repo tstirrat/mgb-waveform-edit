@@ -1,5 +1,16 @@
 {
   "projects": {
     "default": "misc-hosting-2b440"
-  }
+  },
+  "targets": {
+    "misc-hosting-2b440": {
+      "hosting": {
+        "mgb-waveform-edit": [
+          "mgb-waveform-edit"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
