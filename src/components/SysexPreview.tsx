@@ -1,11 +1,8 @@
 import { Card } from "primereact/card";
 import { Waveform } from "../types";
 import { sysexWaveformMessage, toHex } from "../lib/sysex";
-import { Button } from "primereact/button";
-import { PrimeIcons } from "primereact/api";
 import { Flex } from "./Flex";
 import { useMemo } from "react";
-import { IconUtils } from "primereact/utils";
 
 export const SysexPreview: React.FC<{ waveform: Waveform }> = ({
   waveform,

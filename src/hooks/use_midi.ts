@@ -10,7 +10,7 @@ export function useMidiPermission() {
       const { state } = await navigator.permissions.query({
         name: "midi",
         sysex: true,
-      });
+      } as unknown as PermissionDescriptor); // TODO: fix this?
       setGranted(state);
     } catch (e) {
       console.error(`Failed to get MIDI permission`, e);
