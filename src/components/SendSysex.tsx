@@ -1,11 +1,10 @@
 import { Dropdown } from "primereact/dropdown";
 import { useMidiAccess, useMidiPermission } from "../hooks/use_midi";
 import { Flex } from "./Flex";
-import { FormEventHandler, useCallback, useId, useState } from "react";
+import { FormEventHandler, useId, useState } from "react";
 import { Button } from "primereact/button";
 import { PrimeIcons } from "primereact/api";
-import { Knob, KnobChangeEvent } from "primereact/knob";
-import { Callback, Waveform } from "../types";
+import { Waveform } from "../types";
 import { Fieldset } from "primereact/fieldset";
 import { sendWaveformSysex } from "../lib/sysex";
 
@@ -16,7 +15,6 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
   const midi = useMidiAccess();
 
   const [portId, setPortId] = useState<string | undefined>(undefined);
-  const [waveIndex, setWaveIndex] = useState(0);
 
   const sendSysex: FormEventHandler = (e) => {
     e.preventDefault();
@@ -30,11 +28,6 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
 
     sendWaveformSysex(port, waveform);
   };
-
-  const handleWaveIndexChange = useCallback<Callback<KnobChangeEvent>>(
-    (e) => setWaveIndex(e.value),
-    []
-  );
 
   if (!perm) return <strong>Error: Permission unavailable</strong>;
 
@@ -71,17 +64,6 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
               ) => <span>{option?.name ?? placeholder}</span>}
               onChange={(e) => setPortId(e.value)}
               placeholder="MIDI Port"
-            />
-          )}
-        </Field>
-        <Field label="Waveform index">
-          {(id) => (
-            <Knob
-              name="waveIndex"
-              id={id}
-              onChange={handleWaveIndexChange}
-              value={waveIndex}
-              max={16}
             />
           )}
         </Field>
