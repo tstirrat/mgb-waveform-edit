@@ -81,6 +81,7 @@ const SampleColumn: React.FC<{
           key={i}
           value={i}
           isActive={i === value}
+          isMidPoint={i === 8}
           onChange={handleChange}
         />
       ))}
@@ -88,14 +89,16 @@ const SampleColumn: React.FC<{
   );
 };
 
-const SamplePointWrapper = styled.div<{ isActive: boolean }>(
-  ({ isActive: isActive }) => ({
-    width: POINT_SIZE,
-    height: POINT_SIZE,
+const SamplePointWrapper = styled.div<{
+  isActive: boolean;
+  isMidpoint: boolean;
+}>(({ isActive, isMidpoint }) => ({
+  width: POINT_SIZE,
+  height: POINT_SIZE,
 
-    backgroundColor: isActive ? "white" : undefined,
-  })
-);
+  backgroundColor: isActive ? "white" : undefined,
+  boxShadow: isMidpoint ? "inset 0 -1px 0 0 var(--highlight-bg)" : undefined,
+}));
 
 type OnSampleChange = (index: number, value: number) => void;
 
@@ -106,10 +109,10 @@ const SamplePoint: React.FC<{
   readonly onChange: Callback<number>;
   readonly value: number;
   readonly isActive: boolean;
-}> = memo(({ value, isActive, onChange }) => {
+  readonly isMidPoint: boolean;
+}> = memo(({ value, isActive, isMidPoint, onChange }) => {
   const setPoint: MouseEventHandler = (e) => {
     if (e.buttons & LEFT_BUTTON) {
-      // console.log(`${index} = ${value}`);
       onChange(value);
     }
     e.preventDefault();
@@ -118,6 +121,7 @@ const SamplePoint: React.FC<{
 
   return (
     <SamplePointWrapper
+      isMidpoint={isMidPoint}
       isActive={isActive}
       onMouseMove={setPoint}
       onMouseDown={setPoint}
