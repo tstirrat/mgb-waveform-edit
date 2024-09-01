@@ -1,25 +1,34 @@
 import { useState } from "react";
 import { SendSysex } from "./components/SendSysex";
 import { WaveformEditor } from "./components/WaveformEditor";
-import { Waveform } from "./types";
-import { SysexPreview } from "./components/SysexPreview";
+import { Callback, Waveform } from "./types";
+import { MGB_WAVEFORMS } from "./lib/globals";
 import { Flex } from "./components/Flex";
-
-const INITIAL_WAVEFORM: number[] = [
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-  //
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-];
+import { fromBytes } from "./lib/sysex";
+import { WaveformSelector } from "./components/WaveformSelector";
 
 function App() {
-  const [waveform, setWaveform] = useState<Waveform>(INITIAL_WAVEFORM);
+  // deep clone the mGB default set (bytes) into samples
+  const [waveforms, setWaveforms] = useState<Waveform[]>(
+    MGB_WAVEFORMS.map((bytes) => [...fromBytes(bytes)])
+  );
+  const [waveIndex, setWaveIndex] = useState(0);
+
+  const waveform = waveforms[waveIndex];
+
+  const setCurrentWaveform: Callback<Waveform> = (waveform) =>
+    setWaveforms((prev) => {
+      const newWaveforms = [...prev];
+      newWaveforms[waveIndex] = waveform;
+      return newWaveforms;
+    });
 
   return (
     <Flex row justify="center" align="center">
       <Flex col align="stretch" gap={8} style={{ maxWidth: 800 }}>
-        <WaveformEditor waveform={waveform} onChange={setWaveform} />
+        <WaveformEditor waveform={waveform} onChange={setCurrentWaveform} />
+        <WaveformSelector value={waveIndex} onChange={setWaveIndex} />
         <SendSysex waveform={waveform} />
-        <SysexPreview waveform={waveform} />
       </Flex>
     </Flex>
   );

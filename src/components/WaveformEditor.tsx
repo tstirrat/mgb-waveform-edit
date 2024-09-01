@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { memo, MouseEventHandler, useCallback, useMemo } from "react";
 import { Flex } from "./Flex";
-import { BIT_DEPTH, Callback, SAMPLES_PER_WAVEFORM, Waveform } from "../types";
+import { Callback, Waveform } from "../types";
+import { BIT_DEPTH, SAMPLES_PER_WAVEFORM } from "../lib/globals";
 
 export const WaveformEditor: React.FC<{
   readonly waveform: Waveform;
@@ -25,13 +26,7 @@ export const WaveformEditor: React.FC<{
 
   return (
     <Flex col align="center">
-      <Flex row grow="1" align="center" style={{ height: POINT_SIZE }}>
-        {waveform.slice(0, SAMPLES_PER_WAVEFORM).map((val, i) => (
-          <Block key={i} align="center" justify="center">
-            {val.toString(16).toUpperCase()}
-          </Block>
-        ))}
-      </Flex>
+      <WaveformHex waveform={waveform} />
       <Flex row grow="1" align="center" style={{ border: `2px solid white` }}>
         {waveform.map((sample, i) => (
           <SampleColumn
@@ -48,12 +43,13 @@ export const WaveformEditor: React.FC<{
 
 const POINT_SIZE = 20;
 
-const Block = styled(Flex)({
+const Block = styled(Flex)<{ primary?: boolean }>(({ primary }) => ({
   width: POINT_SIZE,
   height: POINT_SIZE,
   textAlign: "center",
   verticalAlign: "middle",
-});
+  color: primary ? `var(--primary-color)` : undefined,
+}));
 
 const SAMPLES = new Array(BIT_DEPTH).fill(0);
 
@@ -128,3 +124,23 @@ const SamplePoint: React.FC<{
     />
   );
 });
+
+/** The indexes to show in primary color so that hex grouping is more clear */
+const HEX_INDEX = [2, 3, 6, 7, 10, 11, 14, 15, 18, 19, 22, 23, 26, 27, 30, 31];
+
+const WaveformHex: React.FC<{ waveform: Waveform }> = ({ waveform }) => {
+  return (
+    <Flex row grow="1" align="center" style={{ height: POINT_SIZE }}>
+      {waveform.slice(0, SAMPLES_PER_WAVEFORM).map((val, i) => (
+        <Block
+          key={i}
+          align="center"
+          justify="center"
+          primary={HEX_INDEX.includes(i)}
+        >
+          {val.toString(16).toUpperCase()}
+        </Block>
+      ))}
+    </Flex>
+  );
+};

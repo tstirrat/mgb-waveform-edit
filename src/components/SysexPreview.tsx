@@ -1,9 +1,5 @@
-import { Card } from "primereact/card";
 import { Waveform } from "../types";
 import { sysexWaveformMessage, toHex } from "../lib/sysex";
-import { useMemo } from "react";
-import { Button } from "primereact/button";
-import { PrimeIcons } from "primereact/api";
 
 export const SysexPreview: React.FC<{ waveform: Waveform }> = ({
   waveform,
@@ -18,51 +14,22 @@ ${sysex[2]} = mGB id
 ${sysex[3]} = mGB channel
 
 <wave data>
-${wave.join(", ")}
+${wave.slice(0, 8).join(", ")}
+${wave.slice(8, 16).join(", ")}
+${wave.slice(16).join(", ")}
 </wave data>
 
 ${sysex[23]} = SYSEX EOF
 `;
 
-  // Convert Blob to URL
-  const blobUrl = useMemo(() => {
-    // Convert object to Blob
-    const blobConfig = new Blob(
-      [Uint8Array.from(sysexWaveformMessage(waveform))],
-      { type: "application/octet-stream" }
-    );
-    return URL.createObjectURL(blobConfig);
-  }, [waveform]);
-
-  const handleDownload = () => {
-    const fileName = "mGB-patch.syx";
-    downloadFile(blobUrl, fileName);
-  };
-
   return (
-    <Card>
-      <Button
-        icon={PrimeIcons.DOWNLOAD}
-        onClick={handleDownload}
-        label="Download .syx file"
-      />
-      <details>
-        <summary>
-          <strong>Sysex data</strong>
-        </summary>
-        <code>
-          <pre>{output}</pre>
-        </code>
-      </details>
-    </Card>
+    <details>
+      <summary>
+        <strong>Show SysEx</strong>
+      </summary>
+      <code>
+        <pre>{output}</pre>
+      </code>
+    </details>
   );
 };
-
-function downloadFile(blobUrl: string, fileName: string) {
-  const link = document.createElement("a");
-  link.href = blobUrl;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}

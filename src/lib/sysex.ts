@@ -1,4 +1,5 @@
-import { BYTES_PER_WAVEFORM, SAMPLES_PER_WAVEFORM, Waveform } from "../types";
+import { Waveform } from "../types";
+import { BYTES_PER_WAVEFORM, SAMPLES_PER_WAVEFORM } from "./globals";
 
 const MIDI_STATUS_SYSEX = 0xf0;
 const SYSEX_NON_COMMERCIAL = 0x7d;
@@ -11,20 +12,33 @@ export function sendWaveformSysex(port: MIDIOutput, waveform: Waveform) {
   port.send(sysexWaveformMessage(waveform));
 }
 
+/** Converts a waveform (32 samples) into a byte array (16 bytes) */
 export function toBytes(waveform: Waveform) {
-  return waveform.reduce((out: number[], sample: number, index: number) => {
+  return waveform.reduce((bytes: number[], sample: number, index: number) => {
     const isHighNibble = index % 2;
     if (isHighNibble) {
-      const lowNibble = out[out.length - 1];
+      const lowNibble = bytes[bytes.length - 1];
 
       const byte = lowNibble + (sample << 4);
 
-      out[out.length - 1] = byte;
+      bytes[bytes.length - 1] = byte;
     } else {
-      out[out.length] = sample;
+      bytes[bytes.length] = sample;
     }
 
-    return out;
+    return bytes;
+  }, []);
+}
+
+/** Converts a byte array (16 bytes) into a waveform (32 samples) */
+export function fromBytes(bytes: number[]) {
+  return bytes.reduce((samples: number[], byte: number) => {
+    const highNibble = byte >> 4;
+    const lowNibble = byte & 0xf;
+
+    samples.push(highNibble, lowNibble);
+
+    return samples;
   }, []);
 }
 

@@ -1,12 +1,15 @@
 import { Dropdown } from "primereact/dropdown";
 import { useMidiAccess, useMidiPermission } from "../hooks/use_midi";
 import { Flex } from "./Flex";
-import { FormEventHandler, useId, useState } from "react";
+import { FormEventHandler, useState } from "react";
 import { Button } from "primereact/button";
 import { PrimeIcons } from "primereact/api";
 import { Waveform } from "../types";
-import { Fieldset } from "primereact/fieldset";
 import { sendWaveformSysex } from "../lib/sysex";
+import { Field } from "./Field";
+import { Card } from "primereact/card";
+import { SysexPreview } from "./SysexPreview";
+import { SysexDownloadButton } from "./SysexDownloadButton";
 
 export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
   waveform,
@@ -40,48 +43,43 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
   }
 
   return (
-    <Fieldset>
-      <Flex
-        row
-        align="center"
-        justify="start"
-        gap={8}
-        as="form"
-        onSubmit={sendSysex}
-      >
-        <Field label="Port">
-          {(id) => (
-            <Dropdown
-              inputId={id}
-              name="midiPort"
-              options={[...midi.outputs.values()]}
-              optionLabel="name"
-              optionValue="id"
-              value={portId}
-              valueTemplate={(
-                option: MIDIOutput | undefined,
-                { placeholder }
-              ) => <span>{option?.name ?? placeholder}</span>}
-              onChange={(e) => setPortId(e.value)}
-              placeholder="MIDI Port"
-            />
-          )}
-        </Field>
-        <Button label="Send" icon={PrimeIcons.PLAY} />
-      </Flex>
-    </Fieldset>
-  );
-};
+    <Card title="Send to mGB">
+      <Flex col align="start" gap={8}>
+        <Flex
+          row
+          align="center"
+          justify="start"
+          gap={8}
+          as="form"
+          onSubmit={sendSysex}
+        >
+          <Field label="Port">
+            {(id) => (
+              <Dropdown
+                inputId={id}
+                name="midiPort"
+                options={[...midi.outputs.values()]}
+                optionLabel="name"
+                optionValue="id"
+                value={portId}
+                valueTemplate={(
+                  option: MIDIOutput | undefined,
+                  { placeholder }
+                ) => <span>{option?.name ?? placeholder}</span>}
+                onChange={(e) => setPortId(e.value)}
+                placeholder="MIDI Port"
+              />
+            )}
+          </Field>
 
-const Field: React.FC<{
-  label: string;
-  children: (id: string) => React.ReactNode;
-}> = ({ label, children }) => {
-  const id = useId();
-  return (
-    <Flex row align="center" gap={8} style={{ alignContent: "center" }}>
-      <label htmlFor={id}>{label}</label>
-      {children(id)}
-    </Flex>
+          <Button label="Send" icon={PrimeIcons.PLAY} />
+        </Flex>
+
+        <Flex row align="baseline">
+          <SysexDownloadButton waveform={waveform} />
+          <SysexPreview waveform={waveform} />
+        </Flex>
+      </Flex>
+    </Card>
   );
 };
