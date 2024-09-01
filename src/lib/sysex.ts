@@ -15,11 +15,10 @@ export function sendWaveformSysex(port: MIDIOutput, waveform: Waveform) {
 /** Converts a waveform (32 samples) into a byte array (16 bytes) */
 export function toBytes(waveform: Waveform) {
   return waveform.reduce((bytes: number[], sample: number, index: number) => {
-    const isHighNibble = index % 2;
-    if (isHighNibble) {
-      const lowNibble = bytes[bytes.length - 1];
+    if (index % 2) {
+      const highNibble = bytes[bytes.length - 1];
 
-      const byte = lowNibble + (sample << 4);
+      const byte = sample + (highNibble << 4);
 
       bytes[bytes.length - 1] = byte;
     } else {
