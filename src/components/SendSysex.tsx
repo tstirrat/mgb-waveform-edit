@@ -10,6 +10,7 @@ import { Field } from "./Field";
 import { Card } from "primereact/card";
 import { SysexPreview } from "./SysexPreview";
 import { SysexDownloadButton } from "./SysexDownloadButton";
+import { Text } from "./Typography";
 
 export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
   waveform,
@@ -77,6 +78,13 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
           <SysexDownloadButton waveform={waveform} />
           <SysexPreview waveform={waveform} />
         </Flex>
+
+        <Text secondary>
+          <em>
+            Note: This currently sends to the ACTIVE mGB WAV slot
+            <br /> (TODO: allow sending to specific slots)
+          </em>
+        </Text>
       </Flex>
     </Card>
   );
