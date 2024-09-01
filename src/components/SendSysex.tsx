@@ -1,5 +1,5 @@
 import { Dropdown } from "primereact/dropdown";
-import { useMidiAccess, useMidiPermission } from "../hooks/use_midi";
+import { useMidiPermission, useMidiPortNames } from "../hooks/use_midi";
 import { Flex } from "./Flex";
 import { FormEventHandler, useState } from "react";
 import { Button } from "primereact/button";
@@ -15,31 +15,35 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
   waveform,
 }) => {
   const perm = useMidiPermission();
-  const midi = useMidiAccess();
+  const { midi, portNames } = useMidiPortNames();
 
-  const [portId, setPortId] = useState<string | undefined>(undefined);
+  const [portName, setPortName] = useState<string | undefined>(undefined);
 
   const sendSysex: FormEventHandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!portId) throw new Error("You must select a port");
+    if (!midi) throw new Error("MIDI is not ready");
 
-    const port = midi?.outputs.get(portId);
+    if (!portName) throw new Error("You must select a port");
 
-    if (!port) throw new Error(`Invalid port ${portId}`);
+    const port = [...midi.outputs.values()].find((o) => o.name === portName);
+
+    if (!port) throw new Error(`Port not found ${portName}`);
 
     sendWaveformSysex(port, waveform);
   };
 
   if (!perm) return <strong>Error: Permission unavailable</strong>;
 
-  if (!midi?.sysexEnabled) return <strong>Error: SysEx not enabled</strong>;
-
   if (!midi) return <strong>Error: No MIDIAccess</strong>;
 
-  if (!portId && midi.outputs.size) {
-    setPortId([...midi.outputs.values()][0].id);
+  if (!midi.sysexEnabled) return <strong>Error: SysEx not enabled</strong>;
+
+  if (!portName && midi.outputs.size) {
+    const first = [...midi.outputs.values()][0];
+
+    if (first.name) setPortName(first.name);
   }
 
   return (
@@ -58,15 +62,9 @@ export const SendSysex: React.FC<{ readonly waveform: Waveform }> = ({
               <Dropdown
                 inputId={id}
                 name="midiPort"
-                options={[...midi.outputs.values()]}
-                optionLabel="name"
-                optionValue="id"
-                value={portId}
-                valueTemplate={(
-                  option: MIDIOutput | undefined,
-                  { placeholder }
-                ) => <span>{option?.name ?? placeholder}</span>}
-                onChange={(e) => setPortId(e.value)}
+                options={portNames}
+                value={portName}
+                onChange={(e) => setPortName(e.value)}
                 placeholder="MIDI Port"
               />
             )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function useMidiPermission() {
   const [granted, setGranted] = useState<PermissionState | undefined>(
@@ -20,17 +20,31 @@ export function useMidiPermission() {
   return granted;
 }
 
-export function useMidiAccess() {
+function useMidiAccess() {
   const [midi, setMidi] = useState<MIDIAccess | undefined>(undefined);
 
-  (async () => {
-    try {
-      const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
-      setMidi(midiAccess);
-    } catch (e) {
-      console.error(`Failed to get MIDI access`, e);
-    }
-  })();
+  useEffect(() => {
+    (async () => {
+      try {
+        const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+        setMidi(midiAccess);
+      } catch (e) {
+        console.error(`Failed to get MIDI access`, e);
+      }
+    })();
+  }, []);
 
   return midi;
+}
+
+export function useMidiPortNames() {
+  const midi = useMidiAccess();
+
+  const portNames = useMemo(() => {
+    if (!midi) return [];
+
+    return [...midi.outputs.values()].map((o) => o.name);
+  }, [midi]);
+
+  return { midi, portNames };
 }
